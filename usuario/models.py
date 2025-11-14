@@ -51,3 +51,12 @@ class Imagem(models.Model):
 
     class Meta:
         db_table = "anexos_publicacao"
+
+class Avaliacao(models.Model):
+    comentario = models.TextField(blank=True, default='')
+    avaliacao = models.DecimalField()
+    publicacao = models.ForeignKey(Publicacao, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'avaliacoes'
