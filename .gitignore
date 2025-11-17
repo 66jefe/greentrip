@@ -12,3 +12,7 @@ venv/
 
 # Variáveis de ambiente
 .env
+
+#ignorando arquivos
+
+media/*

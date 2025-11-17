@@ -36,17 +36,22 @@ class Usuario(AbstractBaseUser):
         db_table = 'usuario'
 
 class Publicacao(models.Model):
+    titulo = models.CharField(max_length=150, default='')
     descricao = models.TextField(default='')
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    endereco = models.CharField(max_length=255, null=True, blank=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_atualizacao = models.DateTimeField(auto_now=True)
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="publicacoes")
 
     class Meta:
         db_table = 'publicacao'
 
 class Imagem(models.Model):
-    arquivo = models.ImageField(upload_to='uploads/')
-    publicacao = models.ForeignKey(Publicacao, on_delete=models.CASCADE)
+    arquivo = models.ImageField(upload_to='publicacoes/')
+    publicacao = models.ForeignKey(Publicacao, on_delete=models.CASCADE, related_name="imagens")
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -54,9 +59,9 @@ class Imagem(models.Model):
 
 class Avaliacao(models.Model):
     comentario = models.TextField(blank=True, default='')
-    avaliacao = models.DecimalField()
-    publicacao = models.ForeignKey(Publicacao, on_delete=models.CASCADE)
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    avaliacao = models.DecimalField(max_digits=2, decimal_places=1)
+    publicacao = models.ForeignKey(Publicacao, on_delete=models.CASCADE, related_name="avaliacoes")
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="avaliacoes")
 
     class Meta:
         db_table = 'avaliacoes'

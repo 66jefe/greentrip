@@ -3,16 +3,6 @@ from usuario.views.visualizacao import *
 from usuario.views.signin import Signin
 from usuario.views.signup import Signup
 
-"""
-urlpatterns = [
-    path("publicacoes/", PublicacaoListView.as_view(), name="publicacoes-list"),
-    path("usuarios/<int:usuario_id>/publicacoes/", PublicacoesDoUsuarioView.as_view()),
-    path("publicacoes/<int:pk>/", PublicacaoDetailView.as_view()),
-    path("signin/", Signin.as_view()),
-    path("signup/", Signup.as_view()),
-]
-"""
-
 urlpatterns = [
     #rotas publicações
     path("publicacoes/", PublicacaoListView.as_view(), name="publicacao-list"),
@@ -23,6 +13,10 @@ urlpatterns = [
 
     #rota publicações dos usuarios
     path("usuario/<int:usuario_id>/publicacoes/", PublicacoesDoUsuarioView.as_view(),  name="publicacoes-do-usuario"),
+
+    #edição do usuario
+    path("usuario/<int:pk>/", UsuarioDetailView.as_view(), name="usuario-detail"),
+    path("usuario/alterar-senha/", AlterarSenhaView.as_view(), name="alterar-senha"),
 
     #rotas avaliacoes
     path("publicacoes/<int:publicacao_id>/avaliacoes/", AvaliacoesDaPublicacaoView.as_view(), name="avaliacoes-list"),

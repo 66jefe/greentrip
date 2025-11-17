@@ -27,11 +27,11 @@ class Authentication:
             raise APIException("A senha não deve ser nula")
         
         if not telefone:
-            raise APIException("O telefone é obrigatório")
+            raise APIException("O telefone não deve ser nulo")
         if not endereco:
-            raise APIException("O endereço é obrigatório")
+            raise APIException("O endereço não deve ser nulo")
         if not cidade:
-            raise APIException("A cidade é obrigatória")
+            raise APIException("A cidade não deve ser nulo")
 
         if User.objects.filter(email=email).exists():
             raise APIException("Este email já existe")
