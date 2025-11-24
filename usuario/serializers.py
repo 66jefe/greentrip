@@ -33,6 +33,8 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
 
 class PublicacaoSerializer(serializers.ModelSerializer):
     imagens = ImagemSerializer(many=True, read_only=True)
+    imagem_principal = serializers.ImageField(write_only=True, required=False)
+    imagens_upload = serializers.ListField(child=serializers.ImageField(),write_only=True,required=False)
     avaliacoes = AvaliacaoSerializer(many=True, read_only=True)
     imagens_remover = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False)
     media = serializers.SerializerMethodField()
@@ -49,6 +51,8 @@ class PublicacaoSerializer(serializers.ModelSerializer):
             "data_criacao",
             "data_atualizacao",
             "imagens",
+            "imagem_principal",
+            "imagens_upload",
             "avaliacoes",
             "media",
         ]

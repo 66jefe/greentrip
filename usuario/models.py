@@ -52,6 +52,7 @@ class Imagem(models.Model):
     arquivo = models.ImageField(upload_to='publicacoes/')
     publicacao = models.ForeignKey(Publicacao, on_delete=models.CASCADE, related_name="imagens")
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
+    is_principal = models.BooleanField(default=False) #definir a imagem principal da publicação
     data_criacao = models.DateTimeField(auto_now_add=True)
 
     class Meta:

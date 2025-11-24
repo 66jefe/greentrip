@@ -23,18 +23,29 @@ class PublicacaoCreateView(CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        imagens = request.FILES.getlist("imagens")
+        imagem_principal = request.FILES.get("imagem_principal")
+        galeria = request.FILES.getlist("imagens_upload")
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         publicacao = serializer.save(usuario=request.user)
 
-        for img in imagens:
+        if imagem_principal:
             Imagem.objects.create(
                 publicacao=publicacao,
                 usuario=request.user,
-                arquivo=img
+                arquivo=imagem_principal,
+                is_principal=True
+            )
+
+        #galeria de imagens
+        for img in galeria:
+            Imagem.objects.create(
+                publicacao=publicacao,
+                usuario=request.user,
+                arquivo=img,
+                is_principal = False
             )
 
         output = self.get_serializer(publicacao)
@@ -47,9 +58,10 @@ class PublicacaoUpdateView(UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        novas_imagens = request.FILES.getlist("imagens")
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        imagem_principal = request.FILES.get("imagem_principal")
+        novas_imagens = request.FILES.getlist("imagens_upload")
         imagens_remover = serializer.validated_data.get("imagens_remover", [])
 
         if imagens_remover:
@@ -60,11 +72,24 @@ class PublicacaoUpdateView(UpdateAPIView):
 
         serializer.save()
 
+        if imagem_principal:
+            Imagem.objects.filter(
+                publicacao=instance, is_principal=True
+            ).delete()
+
+            Imagem.objects.create(
+                publicacao=instance,
+                usuario=request.user,
+                arquivo=imagem_principal,
+                is_principal=True
+            )
+
         for img in novas_imagens:
             Imagem.objects.create(
                 publicacao=instance,
                 usuario=request.user,
-                arquivo=img
+                arquivo=img,
+                is_principal=False
             )
 
         output = self.get_serializer(instance)
