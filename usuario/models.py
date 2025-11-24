@@ -39,9 +39,9 @@ class Publicacao(models.Model):
     titulo = models.CharField(max_length=150, default='')
     descricao = models.TextField(default='')
     especificacao_rota = models.CharField(max_length=250, default='')
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    endereco = models.CharField(max_length=255, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=13, decimal_places=9)
+    longitude = models.DecimalField(max_digits=13, decimal_places=9)
+    endereco = models.CharField(max_length=255, default='')
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_atualizacao = models.DateTimeField(auto_now=True)
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="publicacoes")
@@ -52,7 +52,7 @@ class Publicacao(models.Model):
 class Imagem(models.Model):
     arquivo = models.ImageField(upload_to='publicacoes/')
     publicacao = models.ForeignKey(Publicacao, on_delete=models.CASCADE, related_name="imagens")
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     is_principal = models.BooleanField(default=False) #definir a imagem principal da publicação
     data_criacao = models.DateTimeField(auto_now_add=True)
 
