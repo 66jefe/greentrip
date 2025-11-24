@@ -45,6 +45,7 @@ class PublicacaoSerializer(serializers.ModelSerializer):
             "id",
             "titulo",
             "descricao",
+            "especificacao_rota",
             "latitude",
             "longitude",
             "endereco",
