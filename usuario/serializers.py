@@ -10,7 +10,8 @@ class ImagemSerializer(serializers.ModelSerializer):
         fields = [
             "id", 
             "arquivo", 
-            "data_criacao"
+            "data_criacao",
+            "is_principal"
         ]
         read_only_fields = ["id"]
 
@@ -36,33 +37,47 @@ class PublicacaoSerializer(serializers.ModelSerializer):
     imagem_principal = serializers.ImageField(write_only=True, required=False)
     imagens_upload = serializers.ListField(child=serializers.ImageField(),write_only=True,required=False)
     avaliacoes = AvaliacaoSerializer(many=True, read_only=True)
-    imagens_remover = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False)
+    imagens_remover = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False, allow_empty=True, allow_null=True)
     media = serializers.SerializerMethodField()
 
     class Meta:
         model = Publicacao
-        fields = [
-            "id",
-            "titulo",
-            "descricao",
-            "especificacao_rota",
-            "latitude",
-            "longitude",
-            "endereco",
-            "data_criacao",
-            "data_atualizacao",
-            "imagens",
-            "imagem_principal",
-            "imagens_upload",
-            "avaliacoes",
-            "media",
-        ]
+        fields = "__all__"
+        read_only_fields = ("id", "data_criacao", "data_atualizacao", "usuario")
 
     def get_media(self, obj):
         qs = obj.avaliacoes.all()
         if qs.exists():
             return qs.aggregate(models.Avg("avaliacao"))['avaliacao__avg']
         return 0
+    
+    def create(self, validated_data):
+        request = self.context["request"]
+
+        imagem_principal = validated_data.pop("imagem_principal", None)
+        imagens_upload = validated_data.pop("imagens_upload", [])
+
+        publicacao = Publicacao.objects.create(**validated_data)
+
+        # salva imagem principal
+        if imagem_principal:
+            Imagem.objects.create(
+                publicacao=publicacao,
+                usuario=request.user,
+                arquivo=imagem_principal,
+                is_principal=True
+            )
+
+        # salva imagens da galeria
+        for img in imagens_upload:
+            Imagem.objects.create(
+                publicacao=publicacao,
+                usuario=request.user,
+                arquivo=img,
+                is_principal=False
+            )
+
+        return publicacao
 
 class UsuarioSerializer(serializers.ModelSerializer):
     publicacoes = PublicacaoSerializer(many=True, read_only=True)

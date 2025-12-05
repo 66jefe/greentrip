@@ -23,30 +23,9 @@ class PublicacaoCreateView(CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        imagem_principal = request.FILES.get("imagem_principal")
-        galeria = request.FILES.getlist("imagens_upload")
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         publicacao = serializer.save(usuario=request.user)
-
-        if imagem_principal:
-            Imagem.objects.create(
-                publicacao=publicacao,
-                usuario=request.user,
-                arquivo=imagem_principal,
-                is_principal=True
-            )
-
-        #galeria de imagens
-        for img in galeria:
-            Imagem.objects.create(
-                publicacao=publicacao,
-                usuario=request.user,
-                arquivo=img,
-                is_principal = False
-            )
 
         output = self.get_serializer(publicacao)
         return Response(output.data, status=status.HTTP_201_CREATED)
@@ -57,6 +36,9 @@ class PublicacaoUpdateView(UpdateAPIView):
     permission_classes = [IsAuthenticated, IsOwner]
 
     def update(self, request, *args, **kwargs):
+        print("CORPO RECEBIDO:", request.data)
+        print("FILES:", request.FILES)
+        
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -64,18 +46,23 @@ class PublicacaoUpdateView(UpdateAPIView):
         novas_imagens = request.FILES.getlist("imagens_upload")
         imagens_remover = serializer.validated_data.get("imagens_remover", [])
 
-        if imagens_remover:
-            Imagem.objects.filter(
-                id__in=imagens_remover,
-                publicacao=instance
-            ).delete()
+        print("VALIDATED:", serializer.validated_data)
+
+        if not isinstance(imagens_remover, list):
+            imagens_remover = []
+
+        # if imagens_remover:
+        #     Imagem.objects.filter(
+        #         id__in=imagens_remover,
+        #         publicacao=instance
+        #     ).delete()
 
         serializer.save()
 
         if imagem_principal:
             Imagem.objects.filter(
                 publicacao=instance, is_principal=True
-            ).delete()
+            ).update(is_principal=False)
 
             Imagem.objects.create(
                 publicacao=instance,
@@ -102,11 +89,12 @@ class PublicacaoDeleteView(DestroyAPIView):
 
 class PublicacoesDoUsuarioView(ListAPIView):
     serializer_class = PublicacaoSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         usuario_id = self.kwargs["usuario_id"]
-        return Publicacao.objects.filter(usuario_id=usuario_id)
+        return Publicacao.objects.filter(usuario_id=usuario_id).order_by("-data_criacao")
+
 
 class AvaliacoesDaPublicacaoView(ListAPIView):
     serializer_class = AvaliacaoSerializer
