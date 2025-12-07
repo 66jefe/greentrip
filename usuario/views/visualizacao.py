@@ -1,6 +1,7 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework import status, generics
 
 from usuario.models import Publicacao, Avaliacao, Imagem, Usuario
@@ -51,12 +52,6 @@ class PublicacaoUpdateView(UpdateAPIView):
         if not isinstance(imagens_remover, list):
             imagens_remover = []
 
-        # if imagens_remover:
-        #     Imagem.objects.filter(
-        #         id__in=imagens_remover,
-        #         publicacao=instance
-        #     ).delete()
-
         serializer.save()
 
         if imagem_principal:
@@ -81,6 +76,41 @@ class PublicacaoUpdateView(UpdateAPIView):
 
         output = self.get_serializer(instance)
         return Response(output.data)
+
+class DefinirPrincipalView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        imagem_id = request.data.get("imagem_id")
+        if not imagem_id:
+            return Response({"erro": "imagem_id é obrigatório"}, status=400)
+
+        try:
+            publicacao = Publicacao.objects.get(pk=pk, usuario=request.user)
+        except Publicacao.DoesNotExist:
+            return Response({"erro": "Publicação não encontrada"}, status=404)
+
+        try:
+            nova_principal = Imagem.objects.get(pk=imagem_id, publicacao=publicacao)
+        except Imagem.DoesNotExist:
+            return Response({"erro": "Imagem não encontrada"}, status=404)
+
+        # desmarca anterior
+        Imagem.objects.filter(publicacao=publicacao, is_principal=True).update(is_principal=False)
+
+        # marca nova
+        nova_principal.is_principal = True
+        nova_principal.save()
+
+        # retorna lista atualizada
+        imagens = Imagem.objects.filter(publicacao=publicacao)
+        data = [{
+            "id": img.id,
+            "arquivo": img.arquivo.url,
+            "is_principal": img.is_principal
+        } for img in imagens]
+
+        return Response({"imagens": data})
 
 
 class PublicacaoDeleteView(DestroyAPIView):

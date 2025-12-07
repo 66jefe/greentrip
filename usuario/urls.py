@@ -10,6 +10,7 @@ urlpatterns = [
     path("publicacoes/criar/", PublicacaoCreateView.as_view(), name="publicacao-create"),
     path("publicacoes/<int:pk>/editar/", PublicacaoUpdateView.as_view(), name="publicacao-update"),
     path("publicacoes/<int:pk>/deletar/", PublicacaoDeleteView.as_view(), name="publicacao-delete"),
+    path("publicacoes/<int:pk>/definir_principal/", DefinirPrincipalView.as_view(),name="definir-principal"),
 
     #rota publicações dos usuarios
     path("usuario/<int:usuario_id>/publicacoes/", PublicacoesDoUsuarioView.as_view(),  name="publicacoes-do-usuario"),
