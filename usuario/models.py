@@ -61,9 +61,11 @@ class Imagem(models.Model):
 
 class Avaliacao(models.Model):
     comentario = models.TextField(blank=True, default='')
-    avaliacao = models.DecimalField(max_digits=2, decimal_places=1)
+    avaliacao = models.DecimalField(max_digits=2, decimal_places=1,null=True,blank=True)
     publicacao = models.ForeignKey(Publicacao, on_delete=models.CASCADE, related_name="avaliacoes")
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="avaliacoes")
+    data_criacao = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'avaliacoes'
+        ordering = ['-data_criacao']

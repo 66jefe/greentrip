@@ -140,6 +140,7 @@ class AvaliacaoCreateView(CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        print(self.request.data)  # Ver o que chega
         publicacao_id = self.kwargs["publicacao_id"]
         serializer.save(
             usuario=self.request.user,

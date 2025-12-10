@@ -13,6 +13,7 @@ class ImagemSerializer(serializers.ModelSerializer):
             "data_criacao",
             "is_principal"
         ]
+        ordering = ["is_principal", "-id"]
         read_only_fields = ["id"]
 
 class AvaliacaoSerializer(serializers.ModelSerializer):
@@ -26,10 +27,20 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
             "avaliacao",
             "usuario_nome",
             "usuario",
-            "publicacao"
+            "publicacao",
+            "data_criacao"
         ]
 
         read_only_fields = ["usuario", "publicacao"]
+
+    def validate(self, data):
+        avaliacao = data.get("avaliacao")
+        comentario = data.get("comentario", "").strip()
+
+        if avaliacao is None and not comentario:
+            raise serializers.ValidationError("É necessário enviar uma nota ou um comentário.")
+
+        return data
 
 
 class PublicacaoSerializer(serializers.ModelSerializer):
