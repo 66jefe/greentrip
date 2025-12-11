@@ -37,8 +37,6 @@ class PublicacaoUpdateView(UpdateAPIView):
     permission_classes = [IsAuthenticated, IsOwner]
 
     def update(self, request, *args, **kwargs):
-        print("CORPO RECEBIDO:", request.data)
-        print("FILES:", request.FILES)
         
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
